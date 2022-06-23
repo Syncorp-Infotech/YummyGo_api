@@ -1,0 +1,44 @@
+{
+  "name": "foodie-api",
+  "version": "1.0.0",
+  "description": "Foodie API with Express, Sequelize and MySQL",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js",
+    "serve": "nodemon server.js"
+  },
+  "keywords": [
+    "foodie",
+    "api"
+  ],
+  "author": "udhay.digitworks",
+  "license": "ISC",
+  "dependencies": {
+    "@ffmpeg-installer/ffmpeg": "^1.1.0",
+    "aws-sdk": "^2.658.0",
+    "axios": "^0.21.1",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.20.0",
+    "cors": "^2.8.5",
+    "express": "^4.17.1",
+    "express-fileupload": "^1.1.7-alpha.3",
+    "ffmpeg": "0.0.4",
+    "firebase-admin": "^8.12.1",
+    "fluent-ffmpeg": "^2.1.2",
+    "geopoint": "^1.0.1",
+    "http": "0.0.1-security",
+    "jsonwebtoken": "^8.5.1",
+    "multer": "^1.4.4",
+    "multiparty": "^4.2.3",
+    "mysql2": "^2.1.0",
+    "nodemailer": "^6.6.1",
+    "nodemon": "^2.0.2",
+    "randomstring": "^1.1.5",
+    "referral-code-generator": "^1.0.8",
+    "request": "^2.88.2",
+    "sequelize": "^5.21.6",
+    "serve": "^13.0.2",
+    "socket.io": "^4.1.2"
+  }
+}
