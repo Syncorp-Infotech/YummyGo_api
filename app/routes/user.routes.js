@@ -156,4 +156,55 @@ module.exports = function (app, event) {
             }
         })
     });
+
+    app.get('/userList', function (req, res) {
+        event.body = { role: req.query.role_id, email:req.query.email , user_id:req.query.user_id};
+        event.headers = req.headers;
+        event.queryParams = { page: req.query.page, limit: req.query.limit };
+
+        controller.getUserList(event, {
+            done: function (rescode, resmsg) {
+                res.header(resmsg.headers);
+                res.status(resmsg.statusCode)
+                res.send(resmsg.body)
+            }
+        })
+    });
+
+    app.put('/suspendUser/:user_id', function (req, res) {
+        event.body =  { status : 'S'};
+        event.headers = req.headers;
+        event.pathParams = { user_id: req.params.user_id };
+        controller.updateUserstatus(event, {
+            done: function (rescode, resmsg) {
+                res.header(resmsg.headers);
+                res.status(resmsg.statusCode)
+                res.send(resmsg.body)
+            }
+        })
+    });
+    app.put('/activatedUser/:user_id', function (req, res) {
+        event.body =  { status : 'A'};
+        event.headers = req.headers;
+        event.pathParams = { user_id: req.params.user_id };
+        controller.updateUserstatus(event, {
+            done: function (rescode, resmsg) {
+                res.header(resmsg.headers);
+                res.status(resmsg.statusCode)
+                res.send(resmsg.body)
+            }
+        })
+    });
+    app.put('/deleteUser/:user_id', function (req, res) {
+        event.body =  { status : 'D'};
+        event.headers = req.headers;
+        event.pathParams = { user_id: req.params.user_id };
+        controller.updateUserstatus(event, {
+            done: function (rescode, resmsg) {
+                res.header(resmsg.headers);
+                res.status(resmsg.statusCode)
+                res.send(resmsg.body)
+            }
+        })
+    });
 }

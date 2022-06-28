@@ -180,6 +180,59 @@ exports.fetch_referel_code = function (event, context) {
             context.done(null, send_response(500, { message: err.message }));
         });
 }
+exports.getUserList = function (event, context) {
+    var _whereCond = {};
+    if(event.body.role){
+        _whereCond['role_id'] = event.body.role
+    }
+    if(event.body.email){
+        _whereCond['profile_email'] = event.body.email
+    }
+    if(event.body.user_id){
+        _whereCond['profile_id'] = event.body.user_id
+    }
+    Profile.findAndCountAll({
+        where: _whereCond,
+        include: [{
+            model: User,
+            attributes: ['user_status']
+        }],
+        order: [['profile_first_name']]
+    }).then(users => {
+        context.done(null, send_response(200, users));
+    }).catch(err => {
+        context.done(null, send_response(500, { message: err.message }));
+    });
+}
+exports.updateUserstatus = function (event, context) {
+    verifyToken(event.headers).then(auther => {
+        User.update({
+            user_status: event.body.status,
+            updated_by: auther
+        }, {
+            where: {
+                user_id: event.pathParams.user_id
+            }
+        }).then(user => {
+            Profile.update({
+                profile_status: event.body.status,
+                updated_by: auther
+            }, {
+                where: {
+                    profile_id: event.pathParams.user_id
+                }
+            }).then(user => {
+                context.done(null, send_response(200, { message: 'User status updated successfully' }));
+            }).catch(err => {
+                context.done(null, send_response(500, { message: err.message }));
+            });
+        }).catch(err => {
+            context.done(null, send_response(500, { message: err.message }));
+        });
+    }).catch(err => {
+        context.done(null, send_response(err.status_code ? err.status_code : 400, { message: err.message }));
+    })
+}
 
 
 
