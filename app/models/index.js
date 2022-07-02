@@ -62,6 +62,7 @@ db.share_detail = require("./share_detail.model.js")(sequelize, Sequelize);
 db.like_detail = require("./like_detail.model.js")(sequelize, Sequelize);
 
 db.product_rating = require("./product_rating.model.js")(sequelize, Sequelize);
+db.message = require("./message.model.js")(sequelize, Sequelize);
 
 //Relationship
 
@@ -199,5 +200,11 @@ db.newchat.belongsTo(db.profile, {
   foreignKey: "chat_reciver_id",
   targetKey: "profile_id",
 });
+
+db.message.belongsTo(db.profile, {
+  foreignKey: "profile_id",
+  targetKey: "profile_id",
+});
+db.message.belongsTo(db.role, { foreignKey: "role_id", targetKey: "role_id" });
 
 module.exports = db;

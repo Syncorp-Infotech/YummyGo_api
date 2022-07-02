@@ -100,6 +100,7 @@ require("./routes/share_detail.routes")(app, event);
 require("./routes/like_detail.routes")(app, event);
 
 require("./routes/product_rating.routes")(app, event);
+require("./routes/message.routes")(app, event);
 // require('./routes/merchant_rating.routes')(app, event);
 
 ///new Screen API////

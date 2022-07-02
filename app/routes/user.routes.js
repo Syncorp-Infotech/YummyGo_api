@@ -20,14 +20,24 @@ module.exports = function (app, event) {
         event.body = { role: 2 };
         event.headers = req.headers;
         event.queryParams = { page: req.query.page, limit: req.query.limit };
-
-        controller.listUsers(event, {
-            done: function (rescode, resmsg) {
-                res.header(resmsg.headers);
-                res.status(resmsg.statusCode)
-                res.send(resmsg.body)
-            }
-        })
+        if(req.query.item_code && req.query.item_code!=''){
+            event.body = { item_code: req.query.item_code };
+            controller.getUserByItemCode(event, {
+                done: function (rescode, resmsg) {
+                    res.header(resmsg.headers);
+                    res.status(resmsg.statusCode)
+                    res.send(resmsg.body)
+                }
+            })
+        }else {
+            controller.listUsers(event, {
+                done: function (rescode, resmsg) {
+                    res.header(resmsg.headers);
+                    res.status(resmsg.statusCode)
+                    res.send(resmsg.body)
+                }
+            })
+        }
     });
 
     app.get('/users/vendors', function (req, res) {
@@ -149,6 +159,69 @@ module.exports = function (app, event) {
         event.pathParams = { user_id: req.params.user_id };
 
         controller.updateWebToken(event, {
+            done: function (rescode, resmsg) {
+                res.header(resmsg.headers);
+                res.status(resmsg.statusCode)
+                res.send(resmsg.body)
+            }
+        })
+    });
+
+    app.get('/userList', function (req, res) {
+        event.body = { role: req.query.role_id, email:req.query.email , user_id:req.query.user_id};
+        event.headers = req.headers;
+        event.queryParams = { page: req.query.page, limit: req.query.limit };
+
+        controller.getUserList(event, {
+            done: function (rescode, resmsg) {
+                res.header(resmsg.headers);
+                res.status(resmsg.statusCode)
+                res.send(resmsg.body)
+            }
+        })
+    });
+
+    app.put('/suspendUser/:user_id', function (req, res) {
+        event.body =  { status : 'S'};
+        event.headers = req.headers;
+        event.pathParams = { user_id: req.params.user_id };
+        controller.updateUserstatus(event, {
+            done: function (rescode, resmsg) {
+                res.header(resmsg.headers);
+                res.status(resmsg.statusCode)
+                res.send(resmsg.body)
+            }
+        })
+    });
+    app.put('/activatedUser/:user_id', function (req, res) {
+        event.body =  { status : 'A'};
+        event.headers = req.headers;
+        event.pathParams = { user_id: req.params.user_id };
+        controller.updateUserstatus(event, {
+            done: function (rescode, resmsg) {
+                res.header(resmsg.headers);
+                res.status(resmsg.statusCode)
+                res.send(resmsg.body)
+            }
+        })
+    });
+    app.put('/deleteUser/:user_id', function (req, res) {
+        event.body =  { status : 'D'};
+        event.headers = req.headers;
+        event.pathParams = { user_id: req.params.user_id };
+        controller.updateUserstatus(event, {
+            done: function (rescode, resmsg) {
+                res.header(resmsg.headers);
+                res.status(resmsg.statusCode)
+                res.send(resmsg.body)
+            }
+        })
+    });
+    app.get('/referralUser', function (req, res) {
+        event.body = { role: req.query.role_id, email:req.query.email , user_id:req.query.user_id, referral_code:req.query.referral_code};
+        event.headers = req.headers;
+        event.queryParams = { page: req.query.page, limit: req.query.limit };
+        controller.getUserList(event, {
             done: function (rescode, resmsg) {
                 res.header(resmsg.headers);
                 res.status(resmsg.statusCode)

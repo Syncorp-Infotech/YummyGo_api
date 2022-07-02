@@ -133,3 +133,27 @@ exports.deletecategory = function (event, context) {
         context.done(null, send_response(err.status_code ? err.status_code : 400, { message: err.message }));
     })
 }
+
+exports.getMerchantsCategories = function (event, context) {
+    var _offset = parseInt(event.queryParams.page ? event.queryParams.page : 0);
+    var _limit = parseInt(event.queryParams.limit ? event.queryParams.limit : 100);
+    var _whereCond = { cat_status: "A" };
+    if(event.pathParams.cat_id){
+        _whereCond['cat_id'] = event.pathParams.cat_id;
+    }
+    if(event.pathParams.merchant_id && event.pathParams.merchant_id!='0'){
+        _whereCond['created_by'] = event.pathParams.merchant_id;
+    }
+    var filter = {
+        order: [['created_at', 'DESC']],
+        offset: _offset,
+        limit: _limit,
+        where: _whereCond
+    };
+        Category.findAndCountAll(filter).then(categories => {
+            context.done(null, send_response(200, categories));
+        }).catch(err => {
+            context.done(null, send_response(500, { message: err.message }));
+        });
+}
+

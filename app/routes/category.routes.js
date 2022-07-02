@@ -109,4 +109,20 @@ module.exports = function (app, event) {
         })
     });
 
+    app.get('/merchants/categories/:merchant_id?/:cat_id?', function(req, res) {
+        event.body = { role: 2 };
+        event.headers = req.headers;
+        event.pathParams = { merchant_id: req.params.merchant_id, cat_id:req.params.cat_id };
+        event.queryParams = { page: req.query.page, limit: req.query.limit };
+        controller.getMerchantsCategories(event, {
+            done: function (rescode, resmsg) {
+                res.header(resmsg.headers);
+                res.status(resmsg.statusCode)
+                res.send(resmsg.body)
+            }
+        })
+
+
+    });
+
 }
