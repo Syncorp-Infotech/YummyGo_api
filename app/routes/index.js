@@ -12,6 +12,7 @@ module.exports = function(app, event) {
     require('./city.routes')(app, event);
     require('./notification.routes')(app, event);
     require('./sellproduct.routes')(app, event);
+    require('./message.routes')(app, event);
 
 
     
