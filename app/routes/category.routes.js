@@ -125,4 +125,48 @@ module.exports = function (app, event) {
 
     });
 
+    app.get('/merchants/categories/:merchant_id?/:cat_id?', function(req, res) {
+        event.body = { role: 2 };
+        event.headers = req.headers;
+        event.pathParams = { merchant_id: req.params.merchant_id, cat_id:req.params.cat_id };
+        event.queryParams = { page: req.query.page, limit: req.query.limit };
+        controller.getMerchantsCategories(event, {
+            done: function (rescode, resmsg) {
+                res.header(resmsg.headers);
+                res.status(resmsg.statusCode)
+                res.send(resmsg.body)
+            }
+        })
+
+
+    });
+
+    app.post('/initDeleteCategory/:cat_id', function(req , res) {
+        event.body = { cat_reason: req.body.reason};
+        event.headers = req.headers;
+        event.pathParams = {cat_id:req.params.cat_id };
+        controller.initDeleteCategory(event, {
+            done: function (rescode, resmsg) {
+                res.header(resmsg.headers);
+                res.status(resmsg.statusCode)
+                res.send(resmsg.body)
+            }
+        })
+
+    });
+
+    app.post('/deleteCategory/:cat_id', function(req , res) {
+        event.body = { cat_otp: req.body.otp, status:'D'};
+        event.headers = req.headers;
+        event.pathParams = {cat_id:req.params.cat_id };
+        controller.updateCategory(event, {
+            done: function (rescode, resmsg) {
+                res.header(resmsg.headers);
+                res.status(resmsg.statusCode)
+                res.send(resmsg.body)
+            }
+        })
+
+    });
+
 }

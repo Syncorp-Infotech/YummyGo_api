@@ -81,7 +81,8 @@ module.exports = (sequelize, Sequelize) => {
         merchant_location : Sequelize.STRING(600),
         distance : Sequelize.DOUBLE,
         created_by: Sequelize.INTEGER,
-        updated_by: Sequelize.INTEGER
+        updated_by: Sequelize.INTEGER,
+        order_otp : Sequelize.INTEGER
     }, {
         underscored: true,
         tableName: 'neworder'

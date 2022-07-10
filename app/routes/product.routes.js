@@ -135,4 +135,33 @@ module.exports = function (app, event) {
             }
         })
     });
+
+    app.post('/initDeleteProduct/:prod_id', function(req , res) {
+        event.body = { prod_reason: req.body.reason};
+        event.headers = req.headers;
+        event.pathParams = {prod_id:req.params.prod_id };
+        controller.initDeleteProduct(event, {
+            done: function (rescode, resmsg) {
+                res.header(resmsg.headers);
+                res.status(resmsg.statusCode)
+                res.send(resmsg.body)
+            }
+        })
+
+    });
+
+    app.post('/deleteProduct/:prod_id', function(req , res) {
+        event.body = { prod_otp: req.body.otp, status:'D'};
+        event.headers = req.headers;
+        event.pathParams = {prod_id:req.params.prod_id };
+        controller.updateProductStatus(event, {
+            done: function (rescode, resmsg) {
+                res.header(resmsg.headers);
+                res.status(resmsg.statusCode)
+                res.send(resmsg.body)
+            }
+        })
+
+    });
+
 }

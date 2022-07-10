@@ -1,10 +1,15 @@
-const { send_response } = require('../../utils/app.util')
+const { send_response, uniqueId } = require('../../utils/app.util')
 const { verifyToken } = require('../../utils/jwt.util')
 const { uploadFile } = require('../../utils/s3.util')
+const { sendEmail } = require('../../utils/mail.util');
+const authConfig = require("../../configs/auth.config");
+const fs = require('fs');
 const db = require("../../models");
+const { product } = require('../../models');
 const Category = db.category;
 const Product = db.product;
 const Profile = db.profile;
+const User = db.user;
 
 exports.createproduct = function (event, context) {
     var _data = event.body;
@@ -252,3 +257,77 @@ exports.uploadProdImg = function (event, context) {
         context.done(null, send_response(err.status_code ? err.status_code : 400, { message: err.message }));
     })
 }
+
+exports.initDeleteProduct = function(event, context) {
+    var _data = event.body;
+    verifyToken(event.headers).then(author => {
+        User.findOne({
+            where: {
+                user_id: author
+            }
+        }).then(user => {
+        var prod_otp =  uniqueId(4);
+        Product.update({
+            prod_reason : _data.prod_reason,
+            prod_otp: prod_otp,
+            updated_by: author
+        }, {
+            where: {
+                prod_id: event.pathParams.prod_id
+            }
+        }).then(product => {
+            if(product[0]) {
+                var _msghtml = fs.readFileSync('./app/templates/deleteConfirmationotp.html', 'utf8');
+                const message = {
+                    from: authConfig.smtp.sender,
+                    to: user.user_login,
+                    subject: 'Foodie Product Delete OTP',
+                    html: _msghtml.replace("@FoodieUser", 'Foodie').replace("@Email", user.user_login).replace("@CODEHERE", prod_otp)
+                };
+                sendEmail(message);
+                context.done(null, send_response(200, { message: 'Otp sent successfully' }));
+            }else {
+                context.done(null, send_response(400, { message: "Invalid product Id" }));
+            }
+           
+        }).catch(err => {
+            context.done(null, send_response(500, { message: err.message }));
+        });
+
+        }).catch(err => {
+            context.done(null, send_response(500, { message: err.message }));
+        });
+    }).catch(err => {
+        context.done(null, send_response(err.status_code ? err.status_code : 400, { message: err.message }));
+    })
+};
+
+exports.updateProductStatus = function(event, context) {
+    var _data = event.body;
+    verifyToken(event.headers).then(author => {
+        Product.findOne({
+            where: { prod_id: event.pathParams.prod_id, prod_otp: _data.prod_otp }
+        }).then(product => {
+            if(product){
+                Product.update({
+                    prod_status: _data.status,
+                    updated_by: author
+                }, {
+                    where: {
+                        prod_id: event.pathParams.prod_id, 
+                    }
+                }).then(product => {
+                    context.done(null, send_response(200, { message: 'Product deleted  successfully' }));
+                }).catch(err => {
+                    context.done(null, send_response(500, { message: err.message }));
+                });
+            }else {
+                context.done(null, send_response(400, { message: "Otp is invalid" }));
+            }
+        }).catch(err => {
+            context.done(null, send_response(err.status_code ? err.status_code : 400, { message: err.message }));
+        })
+    }).catch(err => {
+        context.done(null, send_response(err.status_code ? err.status_code : 400, { message: err.message }));
+    })
+};
