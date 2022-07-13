@@ -66,6 +66,9 @@ module.exports = (sequelize, Sequelize) => {
         profile_status: {
             type: Sequelize.STRING(1)
         },
+        is_active: {
+            type: Sequelize.STRING(1)
+        },
         location_lat: Sequelize.DOUBLE,
         location_lng: Sequelize.DOUBLE,
         rating: Sequelize.DOUBLE,

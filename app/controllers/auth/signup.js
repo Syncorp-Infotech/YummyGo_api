@@ -43,6 +43,7 @@ exports.signup = function (event, context) {
               role_id: _signup.role,
               biz_id: 1,
               profile_status: "A",
+              is_active:"A",
               rating: 5,
             })
               .then((profile) => {

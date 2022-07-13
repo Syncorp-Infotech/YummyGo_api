@@ -25,7 +25,7 @@ exports.createVideo = function (event, context) {
     .then((fileurl) => {
       console.log(fileurl);
       console.log(new Date());
-      console.log("data", data);
+      //console.log("data", data);
       Video.create({
         profile_id: _data.user_id,
         video_link: fileurl,
