@@ -186,6 +186,68 @@ module.exports = function (app, event) {
         })
     });
 
+    // order review apis
+    app.get('/orders/users', function (req, res) {
+        event.body = req.body;
+        event.headers = req.headers;
+        event.pathParams = { user_id: req.query.user_id, order_id: req.query.order_id };
+
+        controller.getUsersOrders(event, {
+            done: function (rescode, resmsg) {
+                res.header(resmsg.headers);
+                res.status(resmsg.statusCode)
+                res.send(resmsg.body)
+            }
+        })
+    });
+
+    // order review apis
+    app.get('/orders/list', function (req, res) {
+        event.body = req.body;
+        event.headers = req.headers;
+        event.pathParams = { user_id: req.query.user_id, order_id: req.query.order_id , date_format: req.query.date_format, date: req.query.date };
+        
+        controller.getOrderList(event, {
+            done: function (rescode, resmsg) {
+                res.header(resmsg.headers);
+                res.status(resmsg.statusCode)
+                res.send(resmsg.body)
+            }
+        })
+    });
+
+    app.get('/initOrderRefund/:order_id', function(req , res) {
+        event.body = {};
+        event.headers = req.headers;
+        event.pathParams = {order_id:req.params.order_id };
+        controller.initOrderRefund(event, {
+            done: function (rescode, resmsg) {
+                res.header(resmsg.headers);
+                res.status(resmsg.statusCode)
+                res.send(resmsg.body)
+            }
+        })
+
+    });
+
+    app.post('/orderRefund/:order_id', function(req , res) {
+        event.body = { order_otp: req.body.otp, order_status:'REFUND'};
+        event.headers = req.headers;
+        event.pathParams = {order_id:req.params.order_id };
+        controller.updateNeworderStatus(event, {
+            done: function (rescode, resmsg) {
+                res.header(resmsg.headers);
+                res.status(resmsg.statusCode)
+                res.send(resmsg.body)
+            }
+        })
+
+    });
+
+
+
+    // end
+
     app.get('/orders/:orderid', function (req, res) {
         event.body = req.body;
         event.headers = req.headers;
@@ -255,5 +317,4 @@ module.exports = function (app, event) {
             }
         })
     });
-
 }

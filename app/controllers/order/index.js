@@ -1,4 +1,7 @@
 const { send_response, uniqueId } = require("../../utils/app.util");
+const { sendEmail } = require('../../utils/mail.util');
+const authConfig = require("../../configs/auth.config");
+const fs = require('fs');
 const { verifyToken } = require("../../utils/jwt.util");
 const db = require("../../models");
 const { Sequelize, QueryTypes } = require("sequelize");
@@ -7,7 +10,7 @@ const OrderMst = db.ordermst;
 const Neworder = db.neworder;
 const OrderDtl = db.orderdtl;
 const Product = db.product;
-
+const User = db.user;
 exports.createorder = function (event, context) {
   var _data = event.body;
   verifyToken(event.headers)
@@ -781,3 +784,184 @@ exports.walletYear = function (event, context) {
       );
     });
 };
+
+
+exports.getUsersOrders = function (event, context) {
+  var _whereCond = { };
+  if(event.pathParams.user_id){
+      _whereCond['order_customer_id'] = event.pathParams.user_id;
+  }
+  if(event.pathParams.order_id){
+    _whereCond['order_id'] = event.pathParams.order_id;
+  }
+  var filter = {
+    include: [
+      {
+        model: db.profile,
+        attributes: [
+          "profile_id",
+          "profile_first_name",
+          "profile_last_name",
+          "profile_email"
+        ],
+        as: "customer_info",
+      },
+    ],
+    attributes: [
+      "order_id",
+      "order_customer_id",
+      "order_location"
+
+    ],
+    order: [["created_at", "DESC"]],
+    where: _whereCond
+  };
+  verifyToken(event.headers)
+    .then((auther) => {
+      Neworder.findAndCountAll(filter)
+        .then((ordermaster) => {
+          context.done(null, send_response(200, ordermaster));
+        })
+        .catch((err) => {
+          console.log(err);
+          context.done(null, send_response(500, { message: err.message }));
+        });
+    })
+    .catch((err) => {
+      context.done(
+        null,
+        send_response(err.status_code ? err.status_code : 400, {
+          message: err.message,
+        })
+      );
+    });
+};
+
+exports.getOrderList = function (event, context) {
+  var _whereCond = { };
+  if(event.pathParams.user_id){
+      _whereCond['order_customer_id'] = event.pathParams.user_id;
+  }
+  if(event.pathParams.order_id){
+    _whereCond['order_id'] = event.pathParams.order_id;
+  }
+  var filter = {
+    include: [
+      {
+        model: db.profile,
+        attributes: [
+          "profile_id",
+          "profile_first_name",
+          "profile_last_name",
+          "profile_biz_name",
+        ],
+        as: "merchant_info",
+      },
+      {
+        model: db.profile,
+        attributes: [
+          "profile_id",
+          "profile_first_name",
+          "profile_last_name",
+          "profile_biz_name",
+        ],
+        as: "customer_info",
+      },
+    ],
+    order: [["created_at", "DESC"]],
+    where: _whereCond
+  };
+  verifyToken(event.headers)
+    .then((auther) => {
+      Neworder.findAndCountAll(filter)
+        .then((ordermaster) => {
+          context.done(null, send_response(200, ordermaster));
+        })
+        .catch((err) => {
+          console.log(err);
+          context.done(null, send_response(500, { message: err.message }));
+        });
+    })
+    .catch((err) => {
+      context.done(
+        null,
+        send_response(err.status_code ? err.status_code : 400, {
+          message: err.message,
+        })
+      );
+    });
+};
+
+exports.initOrderRefund = function(event, context) {
+  verifyToken(event.headers).then(author => {
+      User.findOne({
+          where: {
+              user_id: author
+          }
+      }).then(user => {
+      var order_otp =  uniqueId(4);
+      Neworder.update({
+          order_otp: order_otp,
+          updated_by: author
+      }, {
+          where: {
+            order_id: event.pathParams.order_id
+          }
+      }).then(order => {
+          if(order[0]) {
+              var _msghtml = fs.readFileSync('./app/templates/deleteConfirmationotp.html', 'utf8');
+              const message = {
+                  from: authConfig.smtp.sender,
+                  to: user.user_login,
+                  subject: 'Foodie Product Refund OTP',
+                  html: _msghtml.replace("@FoodieUser", 'Foodie').replace("@Email", user.user_login).replace("@CODEHERE", order_otp)
+              };
+              sendEmail(message);
+              context.done(null, send_response(200, { message: 'Otp sent successfully' }));
+          }else {
+              context.done(null, send_response(400, { message: "Invalid order Id" }));
+          }
+         
+      }).catch(err => {
+        console.log(err);
+          context.done(null, send_response(500, { message: err.message }));
+      });
+
+      }).catch(err => {
+        console.log(err);
+          context.done(null, send_response(500, { message: err.message }));
+      });
+  }).catch(err => {
+      context.done(null, send_response(err.status_code ? err.status_code : 400, { message: err.message }));
+  })
+};
+exports.updateNeworderStatus = function (event, context) {
+  var _data = event.body;
+  verifyToken(event.headers).then(author => {
+      Neworder.findOne({
+          where: { order_id: event.pathParams.order_id, order_otp: _data.order_otp }
+      }).then(order => {
+          if(order){
+              Neworder.update({
+                  order_status: _data.order_status,
+                  updated_by: author
+              }, {
+                  where: {
+                      order_id: event.pathParams.order_id, 
+                  }
+              }).then(orderNew => {
+                  context.done(null, send_response(200, { message: 'Product deleted  successfully' }));
+              }).catch(err => {
+                  context.done(null, send_response(500, { message: err.message }));
+              });
+          }else {
+              context.done(null, send_response(400, { message: "Otp is invalid" }));
+          }
+      }).catch(err => {
+          context.done(null, send_response(err.status_code ? err.status_code : 400, { message: err.message }));
+      })
+  }).catch(err => {
+      context.done(null, send_response(err.status_code ? err.status_code : 400, { message: err.message }));
+  })
+ 
+}

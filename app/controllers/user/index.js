@@ -6,6 +6,7 @@ const User = db.user;
 const Role = db.role;
 const Profile = db.profile;
 const Product = db.product;
+const Wallet = db.wallet;
 var GeoPoint = require('geopoint');
 const { product } = require('../../models');
 
@@ -206,6 +207,14 @@ exports.getUserList = function (event, context) {
             model: User,
             attributes: ['user_status','referral_code'],
             where: _whereCondUser 
+        },
+       {
+            model: Role,
+            attributes: ['role_id', 'role_name']
+        },{
+            model: Wallet,
+            attributes: ['wallet_id', 'yummy_pay_balance', 'yummy_saver_balance', 'yummy_premium_balance','yummy_earning_balance'],
+            as: 'wallet_info'
         }],
         order: [['profile_first_name']]
     }).then(users => {
@@ -259,6 +268,23 @@ exports.getUserByItemCode = function (event, context) {
             users.rows = usersObj;
         }
         context.done(null, send_response(200, users));
+    }).catch(err => {
+        context.done(null, send_response(500, { message: err.message }));
+    });
+}
+
+exports.getUserRoles = function (event, context) {
+    var _whereCond = {};
+    if(event.body.role_id){
+        _whereCond['role_id'] = event.body.role_id
+    }
+    if(event.body.role_status){
+        _whereCond['role_status'] = event.body.role_status
+    }
+    Role.findAndCountAll({
+        where: _whereCond
+    }).then(roles => {
+        context.done(null, send_response(200, roles));
     }).catch(err => {
         context.done(null, send_response(500, { message: err.message }));
     });

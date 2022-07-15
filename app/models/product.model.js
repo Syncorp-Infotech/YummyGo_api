@@ -25,6 +25,9 @@ module.exports = (sequelize, Sequelize) => {
         prod_price: Sequelize.DOUBLE,
         prod_desc: Sequelize.STRING(2000),
         prod_reason : Sequelize.STRING(2000),
+        prod_otp : {
+            type: Sequelize.STRING(6)
+        },
         prod_status: {
             type: Sequelize.STRING(1)
         },
