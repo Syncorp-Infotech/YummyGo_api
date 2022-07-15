@@ -64,6 +64,12 @@ db.like_detail = require("./like_detail.model.js")(sequelize, Sequelize);
 db.product_rating = require("./product_rating.model.js")(sequelize, Sequelize);
 db.message = require("./message.model.js")(sequelize, Sequelize);
 
+// db.earningswallet = require("./earningswallet.model.js")(sequelize, Sequelize);
+ db.paywallet = require("./paywallet.model.js")(sequelize, Sequelize);
+// db.premiumwallet = require("./premiumwallet.model.js")(sequelize, Sequelize);
+// db.saverwallet = require("./saverwallet.model.js")(sequelize, Sequelize);
+
+ db.wallet = require("./wallet.model")(sequelize, Sequelize);
 //Relationship
 
 db.role.hasMany(db.profile, { foreignKey: "role_id", sourceKey: "role_id" });
@@ -206,5 +212,12 @@ db.message.belongsTo(db.profile, {
   targetKey: "profile_id",
 });
 db.message.belongsTo(db.role, { foreignKey: "role_id", targetKey: "role_id" });
+
+db.profile.belongsTo(db.wallet, {
+  as: "wallet_info",
+  foreignKey: "profile_id",
+  targetKey: "profile_id",
+});
+
 
 module.exports = db;

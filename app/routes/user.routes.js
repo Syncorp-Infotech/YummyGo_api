@@ -229,4 +229,16 @@ module.exports = function (app, event) {
             }
         })
     });
+    
+    app.get('/roles', function (req, res) {
+        event.body = { role_status: req.query.role_status ? req.query.role_status : 'A' , role_id: req.query.role_id};
+        event.headers = req.headers;
+        controller.getUserRoles(event, {
+            done: function (rescode, resmsg) {
+                res.header(resmsg.headers);
+                res.status(resmsg.statusCode)
+                res.send(resmsg.body)
+            }
+        })
+    });
 }
