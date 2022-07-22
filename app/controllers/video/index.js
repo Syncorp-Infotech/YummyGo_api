@@ -12,6 +12,7 @@ const { json } = require("body-parser");
 // const { json } = require("body-parser");
 // ffmpeg.setFfmpegPath(ffmpegPath);
 const Video = db.video;
+//const profile=db.profile
 const Video_like = db.like_detail;
 
 exports.createVideo = function (event, context) {
@@ -177,15 +178,85 @@ exports.deletevideo = function (event, context) {
 };
 
 exports.listVideos = function (event, context) {
+  console.log("id",event)
   verifyToken(event.headers)
     .then((valid) => {
       var filter = {
+        include: [
+          {
+            
+            model: db.profile,
+            attributes: [
+              "profile_id",
+              "profile_first_name",
+              "profile_last_name",
+              "profile_biz_name",
+              "profile_biz_type",
+              "profile_img",
+            ],
+            as: "merchant_info",
+          },
+        ],
         where: {
           profile_id: event.pathParams.user_id,
         },
         order: [["created_at", "DESC"]],
       };
+      // var filter = {
+      //   where: {
+      //     profile_id: event.pathParams.user_id,
+      //   },
+      //   order: [["created_at", "DESC"]],
+      // };
       Video.findAndCountAll(filter)
+        .then((videos) => {
+          context.done(null, send_response(200, videos));
+        })
+        .catch((err) => {
+          context.done(null, send_response(500, { message: err.message }));
+        });
+    })
+    .catch((err) => {
+      context.done(
+        null,
+        send_response(err.status_code ? err.status_code : 400, {
+          message: err.message,
+        })
+      );
+    });
+};
+
+exports.particularVideo = function (event, context) {
+  verifyToken(event.headers)
+    .then((valid) => {
+      // var filter = {
+      //   where: {
+      //     id: event.pathParams.id,
+      //   },
+      //   //order: [["created_at", "DESC"]],
+      // };
+      var filter = {
+        where: {
+          id: event.pathParams.id,
+        },
+        include: [
+          {
+            
+            model: db.profile,
+            attributes: [
+              "profile_id",
+              "profile_first_name",
+              "profile_last_name",
+              "profile_biz_name",
+              "profile_biz_type",
+              "profile_img",
+            ],
+            as: "merchant_info",
+          },
+        ],
+        //order: [["created_at", "DESC"]],
+      };
+      Video.findOne(filter)
         .then((videos) => {
           context.done(null, send_response(200, videos));
         })
@@ -227,7 +298,7 @@ exports.like_details = function (event, context) {
                 }
               )
               .then(async (value) => {
-                console.log("value", value);
+                //console.log("value", value);
                 element["like_details"] = value;
                 element["like_count"] = value.length;
                 await like_detail.push(element);
@@ -251,7 +322,7 @@ exports.like_details = function (event, context) {
           let compar = video_detail.sort(function (a, b) {
             return b.like_count - a.like_count;
           });
-          console.log("compar", compar);
+          //console.log("compar", compar);
           context.done(null, send_response(200, compar));
         })
         .catch((err) => {
@@ -301,5 +372,50 @@ exports.updatestatus = function (event, context) {
     })
     .catch((err) => {
       context.done(null, send_response(500, { message: err.message }));
+    });
+};
+
+exports.TopTraningVideo = function (event, context) {
+  verifyToken(event.headers)
+    .then((valid) => {
+      // var filter = {
+      //   where: {
+      //     id: event.pathParams.id,
+      //   },
+      //   //order: [["created_at", "DESC"]],
+      // };
+      var filter = {
+        include: [
+          {
+            
+            model: db.profile,
+            attributes: [
+              "profile_id",
+              "profile_first_name",
+              "profile_last_name",
+              "profile_biz_name",
+              "profile_biz_type",
+              "profile_img",
+            ],
+            as: "merchant_info",
+          },
+        ],
+        //order: [["created_at", "DESC"]],
+      };
+      Video.findOne(filter)
+        .then((videos) => {
+          context.done(null, send_response(200, videos));
+        })
+        .catch((err) => {
+          context.done(null, send_response(500, { message: err.message }));
+        });
+    })
+    .catch((err) => {
+      context.done(
+        null,
+        send_response(err.status_code ? err.status_code : 400, {
+          message: err.message,
+        })
+      );
     });
 };

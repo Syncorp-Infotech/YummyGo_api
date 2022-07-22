@@ -71,7 +71,8 @@ module.exports = function (app, event) {
     });
   });
 
-  app.get("/videos/:user_id", function (req, res) {
+  app.get("/videos/myvideo/:user_id", function (req, res) {
+   // console.log("particular video",req)
     event.body = req.body;
     event.headers = req.headers;
     event.pathParams = { user_id: req.params.user_id };
@@ -80,7 +81,7 @@ module.exports = function (app, event) {
       page: req.query.page,
       limit: req.query.limit,
     };
-
+    console.log("particular video",event)
     controller.listVideos(event, {
       done: function (rescode, resmsg) {
         res.header(resmsg.headers);
@@ -89,8 +90,26 @@ module.exports = function (app, event) {
       },
     });
   });
+  
+  app.get("/videos/:id", function (req, res) {
+    event.body = req.body;
+    event.headers = req.headers;
+    event.pathParams = {id: req.params.id };
+    event.queryParams = {
+      type: req.query.type,
+      page: req.query.page,
+      limit: req.query.limit,
+    };
 
-  //// delete video /////
+    controller.particularVideo(event, {
+      done: function (rescode, resmsg) {
+        res.header(resmsg.headers);
+        res.status(resmsg.statusCode);
+        res.send(resmsg.body);
+      },
+    });
+  });
+
   app.delete("/videos/:video_id", function (req, res) {
     event.headers = req.headers;
     event.pathParams = { video_id: req.params.video_id };
@@ -118,18 +137,6 @@ module.exports = function (app, event) {
     });
   });
 
-  // app.put("/:videoid", function (req, res) {
-  //   event.body = req.body;
-  //   event.headers = req.headers;
-  //   event.pathParams = { id: req.params.videoid };
-  //   controller.updatestatus(event, {
-  //     done: function (rescode, resmsg) {
-  //       res.header(resmsg.headers);
-  //       res.status(resmsg.statusCode);
-  //       res.send(resmsg.body);
-  //     },
-  //   });
-  // });
   app.put("/video/unpublic/:videid", function (req, res) {
     event.body = req.body;
     console.log("event.bodt", event.body);
