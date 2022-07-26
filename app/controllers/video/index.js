@@ -399,11 +399,17 @@ exports.TopTraningVideo = function (event, context) {
             ],
             as: "merchant_info",
           },
+          {
+            
+            model: db.like_detail,
+            as: "like_info",
+          },
         ],
         //order: [["created_at", "DESC"]],
       };
       Video.findOne(filter)
         .then((videos) => {
+          console.log("videos",videos)
           context.done(null, send_response(200, videos));
         })
         .catch((err) => {

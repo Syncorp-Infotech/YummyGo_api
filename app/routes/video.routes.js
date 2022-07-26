@@ -47,10 +47,11 @@ module.exports = function (app, event) {
   });
 
   app.get("/videos/toptranding", function (req, res) {
+    console.log("top tranding")
     event.body = req.body;
     event.headers = req.headers;
 
-    controller.like_details(event, {
+    controller.TopTraningVideo(event, {
       done: function (rescode, resmsg) {
         res.header(resmsg.headers);
         res.status(resmsg.statusCode);
